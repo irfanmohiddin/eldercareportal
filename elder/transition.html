@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login/Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="fullscreen-wrapper">
+    <div class="container" id="container">
+
+      <!-- Sign Up Form -->
+      <div class="form-container sign-up-container">
+        <form id="registerForm">
+          <h1>Create Account</h1>
+          <input type="text" name="fullname" placeholder="Full Name" id="regName" required />
+          <input type="email" name="email" placeholder="Email" id="regEmail" required />
+          <input type="password" name="password" placeholder="Password" id="regPassword" required />
+          <input type="phone" name="phone" placeholder="Phone Number" id="regPhone" required />
+          <button type="submit">Register</button>
+        </form>
+      </div>
+
+      <!-- Sign In Form -->
+      <div class="form-container sign-in-container">
+        <form id="loginForm">
+          <h1>Sign In</h1>
+          <input type="email" placeholder="Email" id="loginEmail" required />
+          <input type="password" placeholder="Password" id="loginPassword" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+
+      <!-- Overlay Panels -->
+      <div class="overlay-container">
+        <div class="overlay">
+          <div class="overlay-panel overlay-left">
+            <h1>Welcome Back!</h1>
+            <p>To stay connected, please login with your personal info.</p>
+            <button class="ghost" id="signIn">Sign In</button>
+          </div>
+          <div class="overlay-panel overlay-right">
+            <h1>Hello, Friend!</h1>
+            <p>Enter your details and start your journey with us.</p>
+            <button class="ghost" id="signUp">Register</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- External JS Files -->
+  <script src="login.js"></script>
+  <script src="fadein.js"></script>
+</body>
+</html>

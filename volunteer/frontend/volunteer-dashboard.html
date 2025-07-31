@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volunteer Dashboard</title>
+</head>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  #profile {
+    background-color: #fff;
+    padding: 32px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    margin: 32px auto 24px auto;
+    max-width: 480px;
+    text-align: center;
+    border: 1px solid #e3e3e3;
+  }
+
+  h2 {
+    color: #2d3e50;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  #profile p {
+    color: #555;
+    margin: 8px 0;
+    font-size: 1.1rem;
+  }
+
+  #badges {
+    display: inline-block;
+    background: #f1c40f;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .filter-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+    padding: 24px;
+    max-width: 480px;
+    margin: 0 auto 24px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-inputs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  input[type="text"] {
+    flex: 1 1 160px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #bfc9d1;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+
+  button {
+    padding: 12px 24px;
+    background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    transition: background 0.2s, transform 0.2s;
+  }
+  button:hover {
+    background: linear-gradient(90deg, #217dbb 0%, #27ae60 100%);
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  #requestList {
+    margin: 0 auto;
+    max-width: 640px;
+    padding: 0 16px;
+  }
+
+  .request-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.07);
+    margin-bottom: 18px;
+    padding: 20px 24px;
+    border-left: 5px solid #3498db;
+    transition: box-shadow 0.2s;
+  }
+  .request-card:hover {
+    box-shadow: 0 6px 24px rgba(44, 62, 80, 0.13);
+    border-left: 5px solid #2ecc71;
+  }
+
+  @media (max-width: 700px) {
+    #profile, .filter-section, #requestList {
+      max-width: 98vw;
+      padding: 12px;
+    }
+    .request-card {
+      padding: 12px 10px;
+    }
+    .filter-inputs {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+
+  #profile {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    color: #333;
+  }
+
+  input[type="text"] {
+    width: calc(50% - 10px);
+    padding: 10px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+  #requestList {
+    margin-top: 20px;
+  }
+</style>
+
+<body>
+  <div id="profile">
+    <h2>Welcome, <span id="volunteerName"></span></h2>
+    <p>Email: <span id="volunteerEmail"></span></p>
+    <p>Completed Tasks: <span id="completedTasks"></span></p>
+    <p>Badges: <span id="badges"></span></p>
+  </div>
+
+  <div class="dashboard-flex">
+    <div class="filter-section" style="flex:1; min-width:280px;">
+      <h3 style="color:#3498db; margin-bottom:0;">Filter Requests</h3>
+      <div class="filter-inputs">
+        <input type="text" id="filterCategory" placeholder="Category" />
+        <input type="text" id="filterLocation" placeholder="Location" />
+        <button onclick="loadRequests()">Filter</button>
+      </div>
+      <div id="requestList"></div>
+    </div>
+    <div class="filter-section" style="flex:1; min-width:280px;">
+      <h3 style="color:#2ecc71;">Your Accepted Tasks</h3>
+      <div id="acceptedTaskList"></div>
+    </div>
+  </div>
+  <style>
+  .dashboard-flex {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto 32px auto;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 900px) {
+    .dashboard-flex {
+      flex-direction: column;
+      gap: 18px;
+      max-width: 98vw;
+    }
+  }
+</style>
+
+  <script src="dashboard.js"></script>
+  <script src="fadein.js"></script>
+</body>
+</html>

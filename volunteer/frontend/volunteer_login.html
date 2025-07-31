@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login/Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="fullscreen-wrapper">
+    <div class="container" id="container">
+
+      <!-- Sign Up Form -->
+      <div class="form-container sign-up-container">
+        <form id="registerForm">
+          <h1>Create Account</h1>
+          <input type="text" name="fullname" placeholder="Full Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Password" required />
+          <button type="submit">Register</button>
+        </form>
+      </div>
+
+      <!-- Sign In Form -->
+      <div class="form-container sign-in-container">
+        <form id="loginForm">
+          <h1>Sign In</h1>
+          <input type="email" id="loginEmail" placeholder="Email" required />
+          <input type="password" id="loginPassword" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+
+      <!-- Overlay Panels -->
+      <div class="overlay-container">
+        <div class="overlay">
+          <div class="overlay-panel overlay-left">
+            <h1>Welcome Back!</h1>
+            <p>To stay connected, please login with your personal info.</p>
+            <button class="ghost" id="signIn">Sign In</button>
+          </div>
+          <div class="overlay-panel overlay-right">
+            <h1>Hello, Friend!</h1>
+            <p>Enter your details and start your journey with us.</p>
+            <button class="ghost" id="signUp">Register</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- External JS Files -->
+  <script src="fadein.js"></script>
+
+  <!-- ✅ Register Script -->
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const name = document.querySelector("input[name='fullname']").value;
+      const email = document.querySelector("input[name='email']").value;
+      const password = document.querySelector("input[name='password']").value;
+
+      try {
+        const res = await fetch("https://eldercaresupportportal-2.onrender.com/send-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("name", name);
+          localStorage.setItem("email", email);
+          localStorage.setItem("password", password);
+          alert("OTP sent to your email.");
+          window.location.href = "otp.html";
+        } else {
+          alert(data.message || "Registration failed. Try again.");
+          document.getElementById("container")?.classList.add("right-panel-active");
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+        alert("Server error during registration.");
+      }
+    });
+  </script>
+
+  <!-- ✅ Login Script -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+
+      try {
+        const response = await fetch("https://eldercaresupportportal-2.onrender.com/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          localStorage.setItem("volunteer", JSON.stringify(result.volunteer));
+          localStorage.setItem("password", password);
+          window.location.href = "volunteer-dashboard.html";
+        } else {
+          alert("Invalid email or password.");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        alert("Server error during login.");
+      }
+    });
+  </script>
+
+  <!-- UI toggle -->
+  <script>
+    const signUpButton = document.getElementById("signUp");
+    const signInButton = document.getElementById("signIn");
+    const container = document.getElementById("container");
+
+    signUpButton?.addEventListener("click", () => {
+      container?.classList.add("right-panel-active");
+    });
+
+    signInButton?.addEventListener("click", () => {
+      container?.classList.remove("right-panel-active");
+    });
+  </script>
+</body>
+</html>

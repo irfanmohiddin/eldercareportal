@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+    .dashboard {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #5a67d8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #434190;
+    }
+    .request-card {
+      background: #f1f5f9;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+    }
+    .profile-box {
+      background: #edf2f7;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h2>Welcome, <span id="userName">User</span> 👋</h2>
+
+    <section>
+      <h3>Your Profile</h3>
+      <div class="profile-box">
+        <p><strong>Email:</strong> <span id="userEmail"></span></p>
+        <p><strong>Phone:</strong> <span id="userPhone"></span></p>
+      </div>
+    </section>
+
+    <section>
+      <h3>Post a Support Request</h3>
+      <form id="supportForm">
+        <input type="text" id="title" placeholder="Request Title" required />
+        <textarea id="description" placeholder="Describe your need..." required></textarea>
+
+        <!-- ✅ New Fields -->
+        <select id="category" required>
+          <option value="">Select Category</option>
+          <option value="Medical">Medical</option>
+          <option value="Food">Food</option>
+          <option value="Errands">Errands</option>
+        </select>
+        <input type="text" id="location" placeholder="Your Location" required />
+
+        <button type="submit">Submit Request</button>
+      </form>
+    </section>
+
+    <section>
+      <h3>Your Requests</h3>
+      <div id="requestList"></div>
+    </section>
+
+    <section>
+      <h3>Feedback</h3>
+      <form id="feedbackForm">
+        <select id="requestId" required>
+          <option value="">Select Completed Request</option>
+        </select>
+        <textarea id="feedbackText" placeholder="Your feedback..." required></textarea>
+        <button type="submit">Submit Feedback</button>
+      </form>
+    </section>
+  </div>
+
+  
+  <script src="dashboard.js"></script>
+</body>
+</html>
