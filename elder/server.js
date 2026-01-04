@@ -55,8 +55,6 @@ let otpStore = {}; // Store OTPs and pending users per email
 app.post("/send-otp", async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (!email) return res.json({ success: false, message: "Email is required" });
-  localStorage.setItem("pendingEmail", email);
-
 
   try {
     const existingUser = await User.findOne({ email });
@@ -98,7 +96,7 @@ app.post("/send-otp", async (req, res) => {
   console.error("MESSAGE:", error.message);
   console.error("RESPONSE:", error.response?.body);
   res.json({ success: false, message: error.message });
-}
+});
 
 
 // -------------------- VERIFY OTP --------------------
