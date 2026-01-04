@@ -50,7 +50,15 @@ const Feedback = mongoose.model("Feedback", FeedbackSchema);
 
 // ✅ OTP Logic
 let otpStore = {}; // Store OTPs and pending users per email
-
+ // Configure SendGrid transporter
+  const transporter = nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    });
 // -------------------- SEND OTP --------------------
 app.post("/send-otp", async (req, res) => {
   const { name, email, password, phone } = req.body;
@@ -71,16 +79,6 @@ app.post("/send-otp", async (req, res) => {
     otpStore[email] = { generatedOtp, pendingUser: { name, email, password, phone }, timestamp: Date.now() };
 
     console.log(`Generated OTP for ${email}: ${generatedOtp}`);
-
-    // Configure SendGrid transporter
-    const transporter = nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      auth: {
-        user: "apikey",
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
 
     const mailOptions = {
       from: `"ElderCare OTP" <${process.env.OTP_EMAIL}>`,
