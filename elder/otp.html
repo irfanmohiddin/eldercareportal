@@ -63,20 +63,30 @@
   </div>
 
   <script>
-  async function verifyOtp() {
+async function verifyOtp() {
   const otp = document.getElementById("otpInput").value;
+  const email = localStorage.getItem("pendingEmail");
+
+  if (!email) {
+    alert("Email missing. Please register again.");
+    return;
+  }
 
   try {
-    const response = await fetch("https://eldercaresupportportal-1.onrender.com/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ otp })
-    });
+    const response = await fetch(
+      "https://eldercaresupportportal-1.onrender.com/verify-otp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      }
+    );
 
     const result = await response.json();
 
     if (result.success) {
       alert("OTP Verified Successfully!");
+      localStorage.removeItem("pendingEmail");
       window.location.href = "dashboard.html";
     } else {
       alert(result.message || "Incorrect OTP.");
