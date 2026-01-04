@@ -50,19 +50,13 @@ const Feedback = mongoose.model("Feedback", FeedbackSchema);
 
 // ✅ OTP Logic
 let otpStore = {}; // Store OTPs and pending users per email
- // Configure SendGrid transporter
-  const transporter = nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      auth: {
-        user: "apikey",
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
+ 
 // -------------------- SEND OTP --------------------
 app.post("/send-otp", async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (!email) return res.json({ success: false, message: "Email is required" });
+  localStorage.setItem("pendingEmail", email);
+
 
   try {
     const existingUser = await User.findOne({ email });
@@ -80,6 +74,16 @@ app.post("/send-otp", async (req, res) => {
 
     console.log(`Generated OTP for ${email}: ${generatedOtp}`);
 
+    // Configure SendGrid transporter
+  const transporter = nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    });
+
     const mailOptions = {
       from: `"ElderCare OTP" <${process.env.OTP_EMAIL}>`,
       to: email,
@@ -90,10 +94,12 @@ app.post("/send-otp", async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
-    console.error("Error sending OTP:", error);
-    res.json({ success: false, message: "Failed to send OTP" });
-  }
-});
+  console.error("SENDGRID ERROR:", error);
+  console.error("MESSAGE:", error.message);
+  console.error("RESPONSE:", error.response?.body);
+  res.json({ success: false, message: error.message });
+}
+
 
 // -------------------- VERIFY OTP --------------------
 app.post("/verify-otp", async (req, res) => {
