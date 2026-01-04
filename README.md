@@ -1,10 +1,10 @@
-# 🧓 ElderCare Support Portal
+#  ElderCare Support Portal
 
 A full-stack web application designed to connect elderly users with volunteers and caregivers for timely assistance. The platform focuses on accessibility, security, and ease of use, ensuring that elders can request help and volunteers can respond efficiently.
 
-## 🌟 Key Features
+##  Key Features
 
-### 👴 Elder (User) Side
+###  Elder (User) Side
 
 - User registration with **Email / Phone OTP verification**
 - Secure login & logout
@@ -12,7 +12,7 @@ A full-stack web application designed to connect elderly users with volunteers a
 - View request status (Pending / Accepted / Completed)
 - Simple and senior-friendly UI
 
-### 🤝 Volunteer Side
+###  Volunteer Side
 
 - Volunteer registration with verification
 - Login and dashboard access
@@ -23,7 +23,7 @@ A full-stack web application designed to connect elderly users with volunteers a
 - Earn badges based on completed tasks
 
 
-## 🧑‍💻 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - HTML5
@@ -44,7 +44,7 @@ A full-stack web application designed to connect elderly users with volunteers a
 ### Deployment
 - Frontend & Backend deployed on **Render**
 
-## 🔐 Authentication Flow
+##  Authentication Flow
 
 1. User registers with email/phone number
 2. OTP is sent for verification
@@ -53,7 +53,7 @@ A full-stack web application designed to connect elderly users with volunteers a
 
 This ensures **security and authenticity** of users and volunteers.
 
-## 🚀 Getting Started (Local Setup)
+##  Getting Started (Local Setup)
 
 ### 1️⃣ Clone the repository
 
@@ -92,14 +92,14 @@ npm start
 The application should now be running on your local machine!
 
 
-## 🎯 Project Goals
+##  Project Goals
 
 - Improve accessibility to care for elderly individuals
 - Enable faster help through volunteer engagement
 - Provide a secure, scalable, and user-friendly platform
 - Gain hands-on experience in full-stack development
 
-## 📌 Future Enhancements
+##  Future Enhancements
 
 - [ ] Real-time notifications
 - [ ] Location-based request filtering
@@ -107,7 +107,7 @@ The application should now be running on your local machine!
 - [ ] Mobile-responsive optimizations
 - [ ] AI-based request prioritization
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -117,17 +117,17 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 🐛 Issues
+##  Issues
 
 If you encounter any problems or have suggestions, please open an issue on the [GitHub Issues](https://github.com/irfanmohiddin/eldercareportal/issues) page.
 
 
-## 👤 Author
+##  Author
 
 **Shaik Irfan Mohiddin**  
 Computer Science Student
 
-🔗 [LinkedIn](https://www.linkedin.com/in/shaik-irfan-mohiddin-537589323/)  
-💻 [GitHub](https://github.com/irfanmohiddin)
+ [LinkedIn](https://www.linkedin.com/in/shaik-irfan-mohiddin-537589323/)  
+ [GitHub](https://github.com/irfanmohiddin)
 
 Made with ❤️ to improve elderly care services
