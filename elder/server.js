@@ -49,62 +49,83 @@ const FeedbackSchema = new mongoose.Schema({
 const Feedback = mongoose.model("Feedback", FeedbackSchema);
 
 // ✅ OTP Logic
-let generatedOtp = null;
-let pendingUser = null;
+let otpStore = {}; // Store OTPs and pending users per email
 
+// -------------------- SEND OTP --------------------
 app.post("/send-otp", async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (!email) return res.json({ success: false, message: "Email is required" });
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    return res.json({ success: false, message: "You already have an account with this email. Please use a different email." });
-  }
-
-  generatedOtp = Math.floor(100000 + Math.random() * 900000);
-  pendingUser = { name, email, password, phone };
-  console.log(`Generated OTP for ${email}: ${generatedOtp}`);
-
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.OTP_EMAIL,
-      pass: process.env.OTP_PASS,
-    },
-  });
-
-  const mailOptions = {
-    from: `"ElderCare OTP" <${process.env.OTP_EMAIL}>`,
-    to: email,
-    subject: "Your OTP Code",
-    text: `Your OTP is: ${generatedOtp}`,
-  };
-
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.json({
+        success: false,
+        message: "You already have an account with this email. Please use a different email.",
+      });
+    }
+
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000);
+
+    // Store pending user & OTP per email
+    otpStore[email] = { generatedOtp, pendingUser: { name, email, password, phone }, timestamp: Date.now() };
+
+    console.log(`Generated OTP for ${email}: ${generatedOtp}`);
+
+    // Configure SendGrid transporter
+    const transporter = nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    });
+
+    const mailOptions = {
+      from: `"ElderCare OTP" <${process.env.OTP_EMAIL}>`,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is: ${generatedOtp}`,
+    };
+
     await transporter.sendMail(mailOptions);
-    res.json({ success: true });
+    res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
-    console.error("Error sending mail:", error);
-    res.json({ success: false });
+    console.error("Error sending OTP:", error);
+    res.json({ success: false, message: "Failed to send OTP" });
   }
 });
 
+// -------------------- VERIFY OTP --------------------
 app.post("/verify-otp", async (req, res) => {
-  const { otp } = req.body;
-  if (parseInt(otp) !== generatedOtp || !pendingUser) {
+  const { email, otp } = req.body;
+  if (!otp || !email || !otpStore[email]) {
     return res.json({ success: false, message: "Invalid or expired OTP" });
+  }
+
+  const { generatedOtp, pendingUser, timestamp } = otpStore[email];
+
+  // OTP expires in 5 minutes
+  if (Date.now() - timestamp > 5 * 60 * 1000) {
+    delete otpStore[email];
+    return res.json({ success: false, message: "OTP expired" });
+  }
+
+  if (parseInt(otp) !== generatedOtp) {
+    return res.json({ success: false, message: "Invalid OTP" });
   }
 
   try {
     await User.create(pendingUser);
-    pendingUser = null;
-    generatedOtp = null;
-    res.json({ success: true });
+    delete otpStore[email]; // clear pending user & OTP
+    res.json({ success: true, message: "User verified and registered successfully" });
   } catch (err) {
     console.error("Error saving verified user:", err);
-    res.json({ success: false });
+    res.json({ success: false, message: "Failed to save user" });
   }
 });
+
 
 app.post("/elder-login", async (req, res) => {
   const { email, password } = req.body;
