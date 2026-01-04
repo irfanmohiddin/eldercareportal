@@ -96,7 +96,7 @@ app.post("/send-otp", async (req, res) => {
   console.error("MESSAGE:", error.message);
   console.error("RESPONSE:", error.response?.body);
   res.json({ success: false, message: error.message });
-});
+  }});
 
 
 // -------------------- VERIFY OTP --------------------
