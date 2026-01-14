@@ -53,6 +53,7 @@ const Feedback = mongoose.model("Feedback", FeedbackSchema);
 let otpStore = {}; // Store OTPs and pending users per email
  
 // -------------------- SEND OTP --------------------
+// -------------------- SEND OTP --------------------
 app.post("/send-otp", async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (!email) return res.json({ success: false, message: "Email is required" });
@@ -72,26 +73,33 @@ app.post("/send-otp", async (req, res) => {
     otpStore[email] = { generatedOtp, pendingUser: { name, email, password, phone }, timestamp: Date.now() };
 
     console.log(`Generated OTP for ${email}: ${generatedOtp}`);
+    console.log("Attempting to send email...");
+    console.log("From email:", process.env.OTP_EMAIL);
+    console.log("API Key exists:", !!process.env.SENDGRID_API_KEY);
 
     await sgMail.send({
-    to: email,
-    from: {
-      email: process.env.OTP_EMAIL, // must be verified in SendGrid
-      name: "ElderCare Support Portal",
-   },
-  subject: "Your OTP Code",
-  text: `Your OTP is: ${generatedOtp}`,
-  html: `<h2>Your OTP is: ${generatedOtp}</h2><p>Valid for 5 minutes</p>`,
-  });
+      to: email,
+      from: {
+        email: process.env.OTP_EMAIL,
+        name: "ElderCare Support Portal",
+      },
+      subject: "Your OTP Code",
+      text: `Your OTP is: ${generatedOtp}`,
+      html: `<h2>Your OTP is: ${generatedOtp}</h2><p>Valid for 5 minutes</p>`,
+    });
 
-   res.json({ success: true, message: "OTP sent successfully" });
+    console.log("✅ Email sent successfully to:", email);
+    res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
-  console.error("SENDGRID ERROR:", error);
-  console.error("MESSAGE:", error.message);
-  console.error("RESPONSE:", error.response?.body);
-  res.json({ success: false, message: error.message });
-  }});
-
+    console.error("❌ SENDGRID ERROR:", error);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
+    if (error.response) {
+      console.error("Response body:", JSON.stringify(error.response.body, null, 2));
+    }
+    res.json({ success: false, message: error.message || "Failed to send email" });
+  }
+});
 
 // -------------------- VERIFY OTP --------------------
 app.post("/verify-otp", async (req, res) => {
