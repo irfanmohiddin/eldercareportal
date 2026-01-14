@@ -1,9 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const PORT = process.env.PORT || 5000;
 
 const Volunteer = require("./models/Volunteer");
@@ -14,69 +15,80 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-let resetOtps = {};
-let generatedOtp = null;
-let pendingVolunteer = null;
+// OTP stores (email-based)
+let otpStore = {};      // registration OTPs
+let resetOtps = {};    // password reset OTPs
 
 // ✅ Send registration OTP
 app.post("/send-otp", async (req, res) => {
   const { name, email, password } = req.body;
+  if (!email) return res.json({ success: false, message: "Email required" });
 
   const existing = await Volunteer.findOne({ email });
   if (existing) {
     return res.json({
       success: false,
-      message: "You already have an account with this email. Please use a different email."
+      message: "You already have an account with this email."
     });
   }
 
-  generatedOtp = Math.floor(100000 + Math.random() * 900000);
-  pendingVolunteer = { name, email, password };
+  const otp = Math.floor(100000 + Math.random() * 900000);
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  otpStore[email] = {
+    otp,
+    pendingVolunteer: { name, email, password },
+    timestamp: Date.now()
+  };
+
+  console.log(`Volunteer OTP for ${email}: ${otp}`);
 
   try {
-    await transporter.sendMail({
-      from: 'ElderCare OTP <' + process.env.EMAIL_USER + '>',
+    await sgMail.send({
       to: email,
+      from: {
+        email: process.env.OTP_EMAIL,
+        name: "ElderCare Volunteer Portal"
+      },
       subject: "Your OTP Code",
-      text: `Your OTP is: ${generatedOtp}`
+      text: `Your OTP is: ${otp}`,
+      html: `<h2>${otp}</h2><p>Valid for 5 minutes</p>`
     });
-    res.json({ success: true });
-  } catch (error) {
-    console.error("OTP Send Error:", error);
-    res.json({ success: false });
+
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (err) {
+    console.error("SENDGRID ERROR:", err.response?.body || err.message);
+    res.json({ success: false, message: "Failed to send OTP" });
   }
 });
 
 // ✅ Verify OTP and create account
 app.post("/verify-otp", async (req, res) => {
-  const { otp } = req.body;
-
-  if (parseInt(otp) === generatedOtp && pendingVolunteer) {
-    try {
-      const newVolunteer = new Volunteer({
-        ...pendingVolunteer,
-        tasks: [],
-        completedTasks: 0,
-        badges: []
-      });
-
-      await newVolunteer.save();
-      pendingVolunteer = null;
-      res.json({ success: true });
-    } catch (err) {
-      console.error("Volunteer save error:", err);
-      res.json({ success: false, message: "OTP valid, but account creation failed." });
-    }
-  } else {
-    res.json({ success: false, message: "Invalid OTP." });
+  const { email, otp } = req.body;
+  if (!otpStore[email]) {
+    return res.json({ success: false, message: "OTP expired or invalid" });
+  }
+  const { otp: storedOtp, pendingVolunteer, timestamp } = otpStore[email];
+  // 5 min expiry
+  if (Date.now() - timestamp > 5 * 60 * 1000) {
+    delete otpStore[email];
+    return res.json({ success: false, message: "OTP expired" });
+  }
+  if (parseInt(otp) !== storedOtp) {
+    return res.json({ success: false, message: "Invalid OTP" });
+  }
+  try {
+    const newVolunteer = new Volunteer({
+      ...pendingVolunteer,
+      tasks: [],
+      completedTasks: 0,
+      badges: []
+    });
+    await newVolunteer.save();
+    delete otpStore[email];
+    res.json({ success: true, message: "Volunteer registered successfully" });
+  } catch (err) {
+    console.error("Volunteer save error:", err);
+    res.json({ success: false, message: "Account creation failed" });
   }
 });
 
@@ -217,3 +229,4 @@ mongoose.connect(process.env.MONGO_URI)
     app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
+});
