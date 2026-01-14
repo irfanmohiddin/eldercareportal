@@ -52,23 +52,64 @@
     button:hover {
       background-color: #434190;
     }
+    .error-msg {
+      color: #d32f2f;
+      font-size: 12px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="portal-box">
     <h1>OTP Verification</h1>
     <p>Please enter the OTP sent to your email.</p>
-    <input type="text" id="otpInput" placeholder="Enter OTP">
+    <input type="text" id="otpInput" placeholder="Enter OTP" maxlength="6">
     <button type="button" onclick="verifyOtp()">Verify</button>
+    <p class="error-msg" id="errorMsg"></p>
   </div>
 
   <script>
+// Get email from localStorage or URL parameters
+function getEmail() {
+  // Try localStorage first
+  let email = localStorage.getItem("pendingEmail");
+  
+  // If not in localStorage, try URL parameters
+  if (!email) {
+    const urlParams = new URLSearchParams(window.location.search);
+    email = urlParams.get('email');
+  }
+  
+  return email;
+}
+
+// Check if email exists on page load
+window.onload = function() {
+  const email = getEmail();
+  if (!email) {
+    document.getElementById("errorMsg").textContent = 
+      "Email missing. Redirecting to registration...";
+    setTimeout(() => {
+      window.location.href = "login.html"; // Change to your registration page
+    }, 2000);
+  }
+};
+
 async function verifyOtp() {
-  const otp = document.getElementById("otpInput").value;
-  const email = localStorage.getItem("pendingEmail");
+  const otp = document.getElementById("otpInput").value.trim();
+  const email = getEmail();
+
+  // Clear previous error
+  document.getElementById("errorMsg").textContent = "";
+
+  if (!otp) {
+    document.getElementById("errorMsg").textContent = "Please enter OTP.";
+    return;
+  }
 
   if (!email) {
     alert("Email missing. Please register again.");
+    window.location.href = "login.html"; // Change to your registration page
     return;
   }
 
@@ -89,13 +130,22 @@ async function verifyOtp() {
       localStorage.removeItem("pendingEmail");
       window.location.href = "dashboard.html";
     } else {
-      alert(result.message || "Incorrect OTP.");
+      document.getElementById("errorMsg").textContent = 
+        result.message || "Incorrect OTP. Please try again.";
     }
   } catch (err) {
     console.error("Error verifying OTP:", err);
-    alert("Could not connect to server.");
+    document.getElementById("errorMsg").textContent = 
+      "Could not connect to server. Please try again.";
   }
 }
+
+// Allow Enter key to submit
+document.getElementById("otpInput").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    verifyOtp();
+  }
+});
 </script>
 
 </body>
