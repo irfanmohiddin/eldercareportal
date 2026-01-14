@@ -30,7 +30,8 @@ document.getElementById("registerForm")?.addEventListener("submit", async (e) =>
 
     const data = await res.json();
     if (data.success) {
-      localStorage.setItem("email", email);
+      // ✅ FIX: Save as "pendingEmail" to match OTP page
+      localStorage.setItem("pendingEmail", email);
       localStorage.setItem("name", name);
       localStorage.setItem("phone", phone);
       localStorage.setItem("password", password);
