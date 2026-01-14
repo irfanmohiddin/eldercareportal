@@ -1,9 +1,10 @@
 // ✅ ElderCare Backend with post-OTP database insertion
 const express = require("express");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const path = require("path");
 
 const app = express();
@@ -72,25 +73,18 @@ app.post("/send-otp", async (req, res) => {
 
     console.log(`Generated OTP for ${email}: ${generatedOtp}`);
 
-    // Configure SendGrid transporter
-  const transporter = nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      auth: {
-        user: "apikey",
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
+    await sgMail.send({
+    to: email,
+    from: {
+      email: process.env.OTP_EMAIL, // must be verified in SendGrid
+      name: "ElderCare Support Portal",
+   },
+  subject: "Your OTP Code",
+  text: `Your OTP is: ${generatedOtp}`,
+  html: `<h2>Your OTP is: ${generatedOtp}</h2><p>Valid for 5 minutes</p>`,
+  });
 
-    const mailOptions = {
-      from: `"ElderCare OTP" <${process.env.OTP_EMAIL}>`,
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is: ${generatedOtp}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: "OTP sent successfully" });
+   res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
   console.error("SENDGRID ERROR:", error);
   console.error("MESSAGE:", error.message);
@@ -205,3 +199,5 @@ app.get("/", (req, res) => {
 // ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+
+
